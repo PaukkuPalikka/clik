@@ -23,18 +23,12 @@
 #include "lexer.h"
 #include "parser.h"
 
-int main(int argc, char **argv) {
-	int retval = EXIT_FAILURE;
-	/* TODO: make it accept a third argument */
-	if (argc != 2) {
-		printf("usage: %s sourcefile\n", argv[0]);
-		return retval;
-	}
 
-	FILE *f = fopen(argv[1], "r");
+char *read_file(char *filename) {
+	FILE *f = fopen(filename, "r");
 	if (f == NULL) {
 		perror("fopen() failed");
-		return retval;
+		return NULL;
 	}
 
 	long size;
@@ -56,7 +50,7 @@ int main(int argc, char **argv) {
 
 	if (size == 0) {
 		printf("source file is empty; ignoring\n");
-		retval = EXIT_SUCCESS;
+		/* this will count as a fail as well */
 		goto out_close;
 	}
 
@@ -75,25 +69,50 @@ int main(int argc, char **argv) {
 	/* null terminate the string */
 	buffer[size] = '\0';
 
-	/* now we finally have the source code read into the buffer */
+	if (fclose(f) == EOF) {
+		perror("fclose() failed");
+		goto out_free;
+	}
 
-	printf("\nsource dump\n%s\n", buffer);
-
-	/*tokens = tokenize(buffer);
-	printf("\nlexer dump\n");
-	print_token(tokens);
-
-	ast = parse(tokens);
-	printf("\nparser dump\n");
-	print_tree(ast);*/
-
-	retval = EXIT_SUCCESS;
+	return buffer;
 
 out_free:
 	free(buffer);
 
 out_close:
-	/* maybe this should be done immediately after reading unless error */
-	fclose(f);
+	if (fclose(f) == EOF)
+		perror("fclose() failed");
+	return NULL;
+}
+
+int main(int argc, char **argv) {
+	int retval = EXIT_FAILURE;
+	/* TODO: make it accept a third argument */
+	if (argc != 2) {
+		printf("usage: %s sourcefile\n", argv[0]);
+		return retval;
+	}
+
+	char *source = read_file(argv[1]);
+	if (source == NULL)
+		return retval;
+
+	/* for debug (idea by jift) */
+	printf("\nsource dump\n%s\n", source);
+
+	/*tokens = tokenize(source);
+	printf("\nlexer dump\n");
+	print_token(tokens);
+
+	ast = parse(tokens);
+	free_tokens(tokens);
+	printf("\nparser dump\n");
+	print_tree(ast);
+	free_tree(ast);*/
+
+	retval = EXIT_SUCCESS;
+
+out_free:
+	free(source);
 	return retval;
 }
