@@ -100,13 +100,13 @@ int main(int argc, char **argv) {
 	/* for debug (idea by jift) */
 	printf("\nsource dump\n%s\n", source);
 
-	/*tokens = tokenize(source);
+	struct Token *token_list = tokenize(source);
 	printf("\nlexer dump\n");
-	print_token(tokens);
+	print_token_list(token_list);
 
-	ast = parse(tokens);
-	free_tokens(tokens);
-	printf("\nparser dump\n");
+	/*ast = parse(tokens);*/
+	free_token_list(token_list);
+	/*printf("\nparser dump\n");
 	print_tree(ast);
 	free_tree(ast);*/
 

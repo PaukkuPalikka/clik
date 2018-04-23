@@ -1,0 +1,5 @@
+# this is a comment
+
+u8 test(u8 argument) {
+	return argument * 2;
+}
